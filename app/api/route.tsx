@@ -1,63 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Image from "next/image";
-import { useState } from "react";
+export default async function upload_one(file: File){
 
-export default async function Upload(files:Array<File>) {
-    console.log('hu');
-    console.log(files);
-  // State to store the file
-  
-//   const [file, setFile] = useState<File | null>(null);
-
-//   // State to store the base64
-//   const [base64, setBase64] = useState<string | null>(null);
-
-//   const a = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-
-//     if (!file) {
-//       return;
-//     }
-
-    for (const file of files){
-        await upload_one(file)
-    }
-
-    
-
-
-    // Clear the states after upload
-    //setFile(null);
-    //setBase64(null);
-    //console.log(req);
-    return;
- 
-}
-
-async function upload_one(file: File){
-    // Convert the file to base64
-    let base64 = await toBase64(file) as String;
-
-    let new_b64 = base64.split(",")[1];
-    console.log(new_b64);
+    let base64 = await toBase64(file) as String;  // Convert the file to base64
+    let new_b64 = base64.split(",")[1]; // Trim the metadata in b64 string
+    let ext = file.name.split(".").at(-1); // Trim file name to to get the extension
 
     // You can upload the base64 to your server here
     let stat  = 500;
-    const res = await fetch("http://192.168.1.24:8000/json", {
+    let data = await fetch("http://192.168.1.24:8001/json", {
       method: "POST",
       body: JSON.stringify({
           "metadata": {
-            "username": "username",
-            "file_ext": "jpeg"
+            "username": "username", // You can set up the user data 
+            "file_ext":  ext
           },
           "file": new_b64,
         }),
       headers: {
         "Content-Type": "application/json",
       },
-      
+    }).then((res) => {
+        
+        return res.json();
+    }).then((data) => {
+        return data;
     });  
-    console.log(res.json);
+   
+    async function sendDB(data: any) {
+      const apiEndpoint = '/api/db';
+      let status  = 500;
+      await fetch(apiEndpoint, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          status = response.status;
+        })
+        .catch((err) => {
+          console.log("error");
+        });
+      return status;
+    }
+    sendDB(data);
+    
 }
 
 // Convert a file to base64 string
@@ -76,4 +61,3 @@ const toBase64 = (file: File) => {
       };
     });
 };
-

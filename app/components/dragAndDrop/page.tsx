@@ -1,12 +1,14 @@
 "use client";
 
+import Image from 'next/image'
 import { useRef, useState } from "react";
-import Upload from '@/app/api/route';
+import upload_one from '@/app/api/route';
 
 export default function DragAndDrop() {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const inputRef = useRef<any>(null);
   const [files, setFiles] = useState<any>([]);
+ 
 
   function handleChange(e: any) {
     e.preventDefault();
@@ -23,7 +25,7 @@ export default function DragAndDrop() {
     if (!files) {
       console.log("plop");
     } else {
-      Upload(files);
+      upload_one(files[0]);
     }
   }
 
