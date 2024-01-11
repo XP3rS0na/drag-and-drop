@@ -1,14 +1,34 @@
 "use client";
 
 import Image from 'next/image'
+import { FC } from 'react';
+import { useForm } from 'react-hook-form'
 import { useRef, useState } from "react";
-import upload_one from '@/app/api/route';
+import { sendEmail } from '@/utils/send-db'
+import upload_one from '@/app/api/upload/route';
 
-export default function DragAndDrop() {
+export type FormData = {
+  alt: string;
+}
+
+export default function DragAndDrop(){
+  const { register, handleSubmit } = useForm<FormData>();
+  let [status, setStatus] = useState(0);
+  
   const [dragActive, setDragActive] = useState<boolean>(false);
   const inputRef = useRef<any>(null);
   const [files, setFiles] = useState<any>([]);
  
+  async function onSubmit(data: FormData) {
+    if (!files) {
+      console.log("plop");
+    } else {
+      console.log(data, "et", files);
+      upload_one(files[0], data);
+    }
+    
+
+  }
 
   function handleChange(e: any) {
     e.preventDefault();
@@ -18,14 +38,6 @@ export default function DragAndDrop() {
       for (let i = 0; i < e.target.files["length"]; i++) {
         setFiles((prevState: any) => [...prevState, e.target.files[i]]);
       }
-    }
-  }
-
-  function handleSubmitFile(e: any) {
-    if (!files) {
-      console.log("plop");
-    } else {
-      upload_one(files[0]);
     }
   }
 
@@ -72,7 +84,7 @@ export default function DragAndDrop() {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <form method="POST" encType="multipart/form-data"
+      <div
         className={`${
           dragActive ? "bg-blue-400" : "bg-blue-100"
         }  p-4 w-1/3 rounded-lg  min-h-[10rem] text-center flex flex-col items-center justify-center`}
@@ -119,14 +131,28 @@ export default function DragAndDrop() {
             </div>
           ))}
         </div>
-
-        <button
-          className="bg-black rounded-lg p-2 mt-3 w-auto"
-          onClick={handleSubmitFile}
-        >
-          <span className="p-2 text-white">Submit</span>
-        </button>
-      </form>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className='mb-5'>
+          <label
+            htmlFor='name'
+            className='sm: mb-3 block text-base font-medium text-grey'
+          >
+            Describe your image
+          </label>
+          <input
+            type='text'
+            placeholder='Image of ...'
+            className='w-full rounded-md  border border-gray-300 bg-white py-3 px-6 text-base font-medium text-gray-700 outline-none focus:border-4 focus:border-[#a5b4fc] focus:shadow-md'
+            {...register('alt', { required: true })}
+          />
+        </div>
+          <button
+            className="bg-black rounded-lg p-2 mt-3 w-auto"
+          >
+            <span className="p-2 text-white">Submit</span>
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

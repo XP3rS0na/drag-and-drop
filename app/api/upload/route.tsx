@@ -1,4 +1,8 @@
-export default async function upload_one(file: File){
+import { FormData } from '@/app/components/dragAndDrop/page';
+
+
+export default async function upload_one(file: File, datas: FormData){
+ 
 
     let base64 = await toBase64(file) as String;  // Convert the file to base64
     let new_b64 = base64.split(",")[1]; // Trim the metadata in b64 string
@@ -6,6 +10,7 @@ export default async function upload_one(file: File){
 
     // You can upload the base64 to your server here
     let stat  = 500;
+    let content = datas;
     let data = await fetch("http://192.168.1.24:8001/json", {
       method: "POST",
       body: JSON.stringify({
@@ -25,12 +30,15 @@ export default async function upload_one(file: File){
         return data;
     });  
    
-    async function sendDB(data: any) {
+   
       const apiEndpoint = '/api/db';
       let status  = 500;
       await fetch(apiEndpoint, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          "fileName" : data['file_name'],
+          "alt" : content,
+        }),
       })
         .then((res) => res.json())
         .then((response) => {
@@ -40,8 +48,6 @@ export default async function upload_one(file: File){
           console.log("error");
         });
       return status;
-    }
-    sendDB(data);
     
 }
 
