@@ -1,10 +1,7 @@
 "use client";
 
-import Image from 'next/image'
-import { FC } from 'react';
 import { useForm } from 'react-hook-form'
 import { useRef, useState } from "react";
-import { sendEmail } from '@/utils/send-db'
 import upload_one from '@/app/api/upload/route';
 
 export type FormData = {
@@ -32,24 +29,32 @@ export default function DragAndDrop(){
 
   function handleChange(e: any) {
     e.preventDefault();
+    
     console.log("File has been added");
-    if (e.target.files && e.target.files[0]) {
-      console.log(e.target.files);
-      for (let i = 0; i < e.target.files["length"]; i++) {
-        setFiles((prevState: any) => [...prevState, e.target.files[i]]);
-      }
-    }
+    handle_file_addition(e.target.files)
   }
+  function handle_file_addition(fs: Array<File>){
+   if (!fs) {
+      console.log("File list is empty");
+      return
+    }
+   
+    
+    let file = fs[0];
+    const array = ["jpg","jpeg","png","svg","gif"];
+
+    let name:any = file.name.split(".").at(-1);
+    if (array.indexOf(name)> -1) {
+      setFiles([file]);
+    }
+    else alert("Authorized extensions are .jpg, .jpeg, .png, .svg and .gif");
+    }  
 
   function handleDrop(e: any) {
-    e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      for (let i = 0; i < e.dataTransfer.files["length"]; i++) {
-        setFiles((prevState: any) => [...prevState, e.dataTransfer.files[i]]);
-      }
-    }
+    e.preventDefault();
+    handle_file_addition(e.dataTransfer.files)
   }
 
   function handleDragLeave(e: any) {
@@ -104,7 +109,7 @@ export default function DragAndDrop(){
           ref={inputRef}
           multiple={false}
           onChange={handleChange}
-          accept=".jpg, .jpeg, .png, .svg, .gif"
+          accept=".jpg, .jpeg, .png, .svg, .gif" 
         />
 
         <p>
