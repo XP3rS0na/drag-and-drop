@@ -11,7 +11,7 @@ export default async function upload_one(file: File, datas: FormData){
     // You can upload the base64 to your server here
     let stat  = 500;
     let content = datas;
-    let data = await fetch("http://192.168.1.24:8001/json", {
+    let data = await fetch("http://192.168.1.24:8001/upload", {
       method: "POST",
       body: JSON.stringify({
           "metadata": {
